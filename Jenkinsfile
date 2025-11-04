@@ -18,8 +18,10 @@ pipeline {
             steps {
                 echo "🧹 Cleaning up old containers (if any)..."
                 bat '''
-                for /F "tokens=*" %%i in ('docker ps -q --filter "ancestor=myimage"') do docker stop %%i || exit 0
-                for /F "tokens=*" %%i in ('docker ps -a -q --filter "ancestor=myimage"') do docker rm %%i || exit 0
+                @echo off
+                for /F "tokens=*" %%i in ('docker ps -q --filter "ancestor=myimage"') do docker stop %%i >nul 2>&1
+                for /F "tokens=*" %%i in ('docker ps -a -q --filter "ancestor=myimage"') do docker rm %%i >nul 2>&1
+                exit /b 0
                 '''
             }
         }
@@ -32,11 +34,11 @@ pipeline {
     }
 
     post {
+        success {
+            echo "✅ Pipeline completed successfully! Visit http://localhost:8501 to open your Streamlit app."
+        }
         failure {
             echo "❌ Pipeline failed. Please check console logs for details."
-        }
-        success {
-            echo "✅ Pipeline completed successfully! Access the app at http://localhost:8501"
         }
     }
 }
